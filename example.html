@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>transition-auto</title>
+		<script type="text/javascript" src="dist/transition-auto.min.js"></script>
+		<style>
+			/* transitionAuto CSS*/
+			.outer {
+				overflow: hidden;
+				transition-property: height;
+				transition-duration: 1s;
+			}
+			.inner {
+				overflow: auto;
+			}
+
+			/* Custom CSS */
+			body {
+				max-width: 1200px;
+				margin: auto;
+			}
+			.outer {
+				position: relative;
+				resize: horizontal;
+				background-color: #e6e6e6;
+			}
+			.outer::before {
+				content: "resize me";
+				position: absolute;
+				bottom: 0;
+				right: 20px;
+				padding-top: 3px;
+				padding-right: 30px;
+				padding-bottom: 3px;
+				padding-left: 10px;
+				color: #ffffff;
+				background-color: #777777;
+			}
+			.outer::after {
+				content: "\2192";
+				position: absolute;
+				bottom: 0;
+				right: 25px;
+				padding-top: 3px;
+				padding-bottom: 3px;
+				color: #ffffff;
+				transform: rotate(18deg);
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Example transitionAuto:</h1>
+		<button class="button-height-0">height 0</button><button class="button-height-100">height 100</button><button class="button-height-10rem">height 10rem</button><button class="button-height-auto">height auto</button>
+		<br>
+		<br>
+		<div class="outer">
+			<div class="inner">
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas eu ligula eros. Maecenas in nunc vitae felis volutpat sollicitudin. Vivamus pretium mattis dui, non molestie massa elementum eget. Mauris rhoncus, arcu eu mattis tempus, metus odio pharetra orci, et fringilla ipsum mi ut lectus. Morbi a augue justo. Vestibulum neque quam, laoreet sed convallis non, consequat vitae lectus. Pellentesque interdum eros sed suscipit lacinia. Nulla facilisi. Fusce eget mauris vel est dignissim rhoncus quis sed tortor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut congue, tellus viverra tempor tincidunt, erat metus vulputate urna, eu mattis risus erat non est. Fusce auctor fermentum turpis, accumsan tristique arcu consequat sed. Curabitur mi diam, gravida id venenatis in, pellentesque ac magna. Aliquam vulputate hendrerit lacus ac rutrum. In hac habitasse platea dictumst. In ac porttitor orci.</p>
+				<p>Quisque lacinia vulputate congue. Integer eget pharetra lorem, vitae vestibulum velit. Praesent blandit tellus elit, quis ullamcorper tellus hendrerit sit amet. Sed dignissim sit amet nunc quis tempor. Nunc dolor massa, iaculis nec pretium non, pulvinar imperdiet quam. Donec nisi nulla, accumsan eu vehicula ut, pellentesque vel felis. Nunc id est congue, molestie elit at, ultrices risus. Duis rhoncus fringilla porta. Sed lacus leo, tincidunt at iaculis id, egestas sed nulla. Vestibulum bibendum congue tortor, et tincidunt lacus accumsan sagittis. Maecenas ac sapien quis quam ultrices convallis. Nullam euismod condimentum dui.</p>
+				<p>Mauris lacinia dolor eget est dictum faucibus. Nulla ac tortor nibh. Phasellus tincidunt nisi dolor, a convallis augue eleifend ac. Proin sit amet accumsan nulla. Mauris lobortis, dolor eu accumsan pharetra, nibh enim aliquam lacus, in varius risus ligula vitae dolor. Morbi in ultrices sapien. Maecenas pellentesque quis dolor quis malesuada. Curabitur magna arcu, tempor in hendrerit sed, sodales a nulla. Duis ornare egestas ex in ullamcorper. Integer semper mi eu eros rhoncus varius quis ac dui. Donec laoreet libero luctus aliquam condimentum. Donec rhoncus at sem eu gravida. Suspendisse porta, velit et vestibulum blandit, mauris dolor tempor elit, vel faucibus elit metus ac lectus.</p>
+			</div>
+		</div>
+		<script>
+			document.querySelector('.button-height-0').addEventListener('click', () => {
+				transitionAuto({
+					element: document.querySelector('.outer'),
+					height: 0
+				});
+			});
+			document.querySelector('.button-height-100').addEventListener('click', () => {
+				transitionAuto({
+					element: document.querySelector('.outer'),
+					height: 100
+				});
+			});
+			document.querySelector('.button-height-10rem').addEventListener('click', () => {
+				transitionAuto({
+					element: document.querySelector('.outer'),
+					height: '10rem'
+				});
+			});
+			document.querySelector('.button-height-auto').addEventListener('click', () => {
+				transitionAuto({
+					element: document.querySelector('.outer'),
+					height: 'auto'
+				});
+			});
+		</script>
+	</body>
+</html>
