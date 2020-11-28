@@ -70,11 +70,11 @@ Optional. The inner element that will wrap the content and dictate the the 'auto
 
 ### `options.width`
 
-At least one `options.width` or `options.height` must be set. Can be a number (assumed pixels) or a string (any unit). THe value to transition the element to.
+At least one `options.width` or `options.height` must be set. Can be a number (assumed pixels) or a string (any unit). The value to transition the element to.
 
 ### `options.height`
 
-At least one `options.width` or `options.height` must be set. Can be a number (assumed pixels) or a string (any unit). THe value to transition the element to.
+At least one `options.width` or `options.height` must be set. Can be a number (assumed pixels) or a string (any unit). The value to transition the element to.
 
 ### `options.debug`
 
