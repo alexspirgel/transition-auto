@@ -4,8 +4,8 @@ Transition Auto is a JavaScript function enabling element width and height trans
 
 Notes:
 * Resizing the element during the transition to auto can cause a "jump" to the new auto value at the end of the transition.
-* The `options.innerElement` should not have styling that would cause it to differ in size from the `options.element`.
-* To properly transition to a width of 'auto' make sure that the `options.innerElement` is not width limited by the `options.element`.
+* The `innerElement` should not have styling that would cause it to differ in size from the `element`.
+* To properly transition to a `width` of 'auto' make sure that the `innerElement` is not width limited by the `element`.
 
 ## Installation
 
@@ -60,22 +60,22 @@ transitionAuto({
 
 ## Options
 
-### `options.element`
+### `element`
 
 Required. The element that will be transitioned.
 
-### `options.innerElement`
+### `innerElement`
 
-Optional. The inner element that will wrap the content and dictate the the 'auto' sizing. If no element is passed, the first child of the `options.element` will be used.
+Optional. The inner element that will wrap the content and dictate the the 'auto' sizing. If no element is passed, the first child of the `element` will be used.
 
-### `options.width`
+### `width`
 
-At least one `options.width` or `options.height` must be set. Can be a number (assumed pixels) or a string (any unit). The value to transition the element to.
+At least one `width` or `height` must be set. Can be a number (assumed pixels) or a string (any unit). The value to transition the element to.
 
-### `options.height`
+### `height`
 
-At least one `options.width` or `options.height` must be set. Can be a number (assumed pixels) or a string (any unit). The value to transition the element to.
+At least one `width` or `height` must be set. Can be a number (assumed pixels) or a string (any unit). The value to transition the element to.
 
-### `options.debug`
+### `debug`
 
 Optional. Set to `true` to enable helpful console logs when debugging.
