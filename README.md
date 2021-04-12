@@ -16,7 +16,7 @@ npm install @alexspirgel/transition-auto
 ```
 
 ```js
-const Schema = require('@alexspirgel/transition-auto');
+const transitionAuto = require('@alexspirgel/transition-auto');
 ```
 
 ### Using a script tag:
