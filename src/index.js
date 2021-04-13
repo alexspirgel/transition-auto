@@ -1,87 +1,118 @@
-const transitionAuto = (options) => {
-	let normalizedOptions;
-	try {
-		transitionAuto.optionsSchema.validate(options);
-		normalizedOptions = transitionAuto.normalizeOptions(options);
-	}
-	catch (error) {
-		transitionAuto.error(error);
-	}
-	transitionAuto.debug(normalizedOptions, 'normalized options:', normalizedOptions);
+const optionsSchema = require('./options-schema.js');
+const extend = require('@alexspirgel/extend');
 
-	options.element.removeEventListener('transitionend', transitionAuto.transitionendHandlerWidthAuto);
-	options.element.removeEventListener('transitionend', transitionAuto.transitionendHandlerHeightAuto);
+const transitionAuto = (function () {
 
-	transitionAuto.forceCurrentDimensions(normalizedOptions);
-	transitionAuto.setDimensions(normalizedOptions);
-};
-
-transitionAuto.debug = (options, ...messages) => {
-	if (options.debug) {
-		const debugPrefix = 'transitionAuto debug:';
-		console.log(debugPrefix, ...messages);
-	}
-};
-
-transitionAuto.error = (message) => {
 	const errorPrefix = 'transitionAuto error: ';
-	throw new Error(errorPrefix + message);
-};
-
-transitionAuto.optionsSchema = require('./options-schema.js');
-
-transitionAuto.normalizeOptions = require('./normalize-options.js');
-
-transitionAuto.forceCurrentDimensions = (options) => {
-	computedStyle = getComputedStyle(options.element);
-	if (options.width !== undefined && options.width !== null) {
-		options.element.style.width = computedStyle.width;
+	const debugPrefix = 'transitionAuto debug: ';
+	
+	function prefixedError(message) {
+		throw new Error(errorPrefix + message);
 	}
-	if (options.height !== undefined && options.height !== null) {
-		options.element.style.height = computedStyle.height;
-	}
-	options.element.offsetWidth; // This line does nothing but force the element to redraw so the transition works properly.
-};
 
-transitionAuto.setDimensions = (options) => {
-	let elementBoundingClientRect;
-	let innerElementBoundingClientRect;
-	if (options.width === 'auto' || options.height === 'auto') {
-		elementBoundingClientRect = options.element.getBoundingClientRect();
-		innerElementBoundingClientRect = options.innerElement.getBoundingClientRect();
-	}
-	if (options.width !== undefined && options.width !== null) {
-		if (options.width === 'auto' && elementBoundingClientRect.width !== innerElementBoundingClientRect.width) {
-			options.element.addEventListener('transitionend', transitionAuto.transitionendHandlerWidthAuto);
-			options.element.style.width = innerElementBoundingClientRect.width + 'px';
-		}
-		else {
-			options.element.style.width = options.width;
+	function debug(options, ...messages) {
+		if (options.debug) {
+			console.log(debugPrefix, ...messages);
 		}
 	}
-	if (options.height !== undefined && options.height !== null) {
-		if (options.height === 'auto' && elementBoundingClientRect.height !== innerElementBoundingClientRect.height) {
-			options.element.addEventListener('transitionend', transitionAuto.transitionendHandlerHeightAuto);
-			options.element.style.height = innerElementBoundingClientRect.height + 'px';
-		}
-		else {
-			options.element.style.height = options.height;
-		}
-	}
-};
 
-transitionAuto.transitionendHandlerWidthAuto = (event) => {
-	if (event.propertyName === 'width') {
-		event.target.removeEventListener('transitionend', transitionAuto.transitionendHandlerWidthAuto);
-		event.target.style.width = 'auto';
-	}
-};
+	function normalizeOptions(options) {
+		options = extend({}, options);
+	
+		if (options.innerElement === undefined || options.innerElement === null) {
+			if (options.element.children.length > 0) {
+				options.innerElement = options.element.children[0];
+			}
+			else {
+				error(`'options.element' must have at least one child element to use as 'options.innerElement'.`);
+			}
+		}
+	
+		if (typeof options.value === 'number') {
+			options.value += 'px';
+		}
 
-transitionAuto.transitionendHandlerHeightAuto = (event) => {
-	if (event.propertyName === 'height') {
-		event.target.removeEventListener('transitionend', transitionAuto.transitionendHandlerHeightAuto);
-		event.target.style.height = 'auto';
+		if (options.suppressDuplicates === undefined) {
+			options.suppressDuplicates = true;
+		}
+	
+		return options;
 	}
-};
+	
+	function setValue(options) {
+		options.element.transitionAutoValue = options.value;
+		const computedStyle = getComputedStyle(options.element);
+		options.element.style[options.property] = computedStyle[options.property];
+		options.element.offsetWidth; // This line does nothing but force the element to repaint so transitions work properly.
+		const getComputedTransitionProperties = computedStyle.transitionProperty.split(', ');
+		if (getComputedTransitionProperties.includes(options.property)) {
+			if (options.value === 'auto') {
+				const elementDimensions = options.element.getBoundingClientRect();
+				const innerElementDimensions = options.innerElement.getBoundingClientRect();
+				if (elementDimensions[options.property] !== innerElementDimensions[options.property]) {
+					options.element.transitionAutoBoundHandler = transitionendHandler.bind(options);
+					options.element.addEventListener('transitionend', options.element.transitionAutoBoundHandler);
+					options.element.style[options.property] = innerElementDimensions[options.property] + 'px';
+					return;
+				}
+			}
+			else {
+				if (options.element.style[options.property] !== options.value) {
+					options.element.transitionAutoBoundHandler = transitionendHandler.bind(options);
+					options.element.addEventListener('transitionend', options.element.transitionAutoBoundHandler);
+					options.element.style[options.property] = options.value;
+					return;
+				}
+			}
+		}
+		options.element.style[options.property] = options.value;
+		onComplete(options);
+	}
+	
+	function transitionendHandler(event) {
+		if (event.propertyName === this.property) {
+			if (this.element.transitionAutoBoundHandler) {
+				this.element.removeEventListener('transitionend', this.element.transitionAutoBoundHandler);
+				delete this.element.transitionAutoBoundHandler;
+			}
+			if (this.value === 'auto') {
+				this.element.style[this.property] = this.value;
+			}
+		}
+		onComplete(this);
+	}
+
+	function onComplete(options) {
+		if (options.element.transitionAutoValue) {
+			delete options.element.transitionAutoValue;
+		}
+		if (options.onComplete) {
+			options.onComplete(options);
+		}
+	}
+
+	return function (options) {
+		try {
+			optionsSchema.validate(options);
+		}
+		catch (error) {
+			prefixedError(error);
+		}
+		options = normalizeOptions(options);
+		debug(options, 'options:', options);
+		if (options.suppressDuplicates && options.element.transitionAutoValue) {
+			if (options.value === options.element.transitionAutoValue) {
+				debug(options, 'duplicate suppressed');
+				return;
+			}
+		}
+		if (options.element.transitionAutoBoundHandler) {
+			options.element.removeEventListener('transitionend', options.element.transitionAutoBoundHandler);
+			delete options.element.transitionAutoBoundHandler;
+		}
+		setValue(options);
+	};
+
+})();
 
 module.exports = transitionAuto;

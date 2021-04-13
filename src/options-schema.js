@@ -24,34 +24,47 @@ const optionsModel = {
 				}
 			}
 		},
-		width: [
+		property: {
+			required: true,
+			type: 'string',
+			exactValue: [
+				'height',
+				'width'
+			]
+		},
+		value: [
 			{
-				type: 'number'
+				required: true,
+				type: 'number',
+				greaterThanOrEqualTo: 0
 			},
 			{
-				type: 'string'
-			}
-		],
-		height: [
-			{
-				type: 'number'
+				required: true,
+				type: 'string',
+				custom: (inputPathManager) => {
+					const value = inputPathManager.value;
+					if (value.endsWith('px')) {
+						return true;
+					}
+					else {
+						throw new Schema.ValidationError(`'options.value' string must end with 'px'.`);
+					}
+				}
 			},
 			{
-				type: 'string'
+				required: true,
+				type: 'string',
+				exactValue: 'auto'
 			}
 		],
+		onComplete: {
+			type: 'function'
+		},
+		suppressDuplicates: {
+			type: 'boolean'
+		},
 		debug: {
 			type: 'boolean'
-		}
-	},
-	custom: (inputPathManager) => {
-		const requiredSchema = new Schema({required: true});
-		if (!requiredSchema.validate(inputPathManager.value.width, 'boolean') &&
-		!requiredSchema.validate(inputPathManager.value.height, 'boolean')) {
-			throw new Schema.ValidationError(`At least one 'options.width' or 'options.height' value is required.`);
-		}
-		else {
-			return true;
 		}
 	}
 };

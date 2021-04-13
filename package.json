@@ -1,9 +1,10 @@
 {
   "name": "@alexspirgel/transition-auto",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "author": "Alexander Spirgel",
   "description": "A JavaScript function to allow for element width and height transitions to and from auto.",
   "keywords": [
+    "transitionAuto",
     "transition",
     "auto",
     "width",

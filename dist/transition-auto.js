@@ -1,5 +1,5 @@
 /*!
- * transition-auto v1.0.1
+ * transition-auto v2.0.0
  * https://github.com/alexspirgel/transition-auto
  */
 var transitionAuto =
@@ -93,13 +93,9 @@ var transitionAuto =
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/**
- * Extend v3.0.0
- * https://github.com/alexspirgel/extend
- */
+const isPlainObject = __webpack_require__(6);
 
 const extend = (...arguments) => {
-
 	let target = arguments[0];
 	let argumentIndex, merge, mergeIsArray;
 	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
@@ -108,11 +104,11 @@ const extend = (...arguments) => {
 			continue;
 		}
 		mergeIsArray = Array.isArray(merge);
-		if (mergeIsArray || extend.isPlainObject(merge)) {
+		if (mergeIsArray || isPlainObject(merge)) {
 			if (mergeIsArray && !Array.isArray(target)) {
 				target = [];
 			}
-			else if (!mergeIsArray && !extend.isPlainObject(target)) {
+			else if (!mergeIsArray && !isPlainObject(target)) {
 				target = {};
 			}
 			for (const property in merge) {
@@ -128,36 +124,10 @@ const extend = (...arguments) => {
 			}
 		}
 	}
-
 	return target;
-
 };
 
-extend.isPlainObject = (object) => {
-	const baseObject = {};
-	const toString = baseObject.toString;
-	const hasOwnProperty = baseObject.hasOwnProperty;
-	const functionToString = hasOwnProperty.toString;
-	const objectFunctionString = functionToString.call(Object);
-	if (toString.call(object) !== '[object Object]') {
-		return false;
-	}
-	const prototype = Object.getPrototypeOf(object);
-	if (prototype) {
-		if (hasOwnProperty.call(prototype, 'constructor')) {
-			if (typeof prototype.constructor === 'function') {
-				if (functionToString.call(prototype.constructor) !== objectFunctionString) {
-					return false;
-				}
-			}
-		}
-	}
-	return true;
-};
-
-if ( true && module.exports) {
-	module.exports = extend;
-}
+module.exports = extend;
 
 /***/ }),
 /* 1 */
@@ -281,91 +251,122 @@ module.exports = DataPathManager;
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const transitionAuto = (options) => {
-	let normalizedOptions;
-	try {
-		transitionAuto.optionsSchema.validate(options);
-		normalizedOptions = transitionAuto.normalizeOptions(options);
-	}
-	catch (error) {
-		transitionAuto.error(error);
-	}
-	transitionAuto.debug(normalizedOptions, 'normalized options:', normalizedOptions);
+const optionsSchema = __webpack_require__(4);
+const extend = __webpack_require__(0);
 
-	options.element.removeEventListener('transitionend', transitionAuto.transitionendHandlerWidthAuto);
-	options.element.removeEventListener('transitionend', transitionAuto.transitionendHandlerHeightAuto);
+const transitionAuto = (function () {
 
-	transitionAuto.forceCurrentDimensions(normalizedOptions);
-	transitionAuto.setDimensions(normalizedOptions);
-};
-
-transitionAuto.debug = (options, ...messages) => {
-	if (options.debug) {
-		const debugPrefix = 'transitionAuto debug:';
-		console.log(debugPrefix, ...messages);
-	}
-};
-
-transitionAuto.error = (message) => {
 	const errorPrefix = 'transitionAuto error: ';
-	throw new Error(errorPrefix + message);
-};
-
-transitionAuto.optionsSchema = __webpack_require__(4);
-
-transitionAuto.normalizeOptions = __webpack_require__(8);
-
-transitionAuto.forceCurrentDimensions = (options) => {
-	computedStyle = getComputedStyle(options.element);
-	if (options.width !== undefined && options.width !== null) {
-		options.element.style.width = computedStyle.width;
+	const debugPrefix = 'transitionAuto debug: ';
+	
+	function prefixedError(message) {
+		throw new Error(errorPrefix + message);
 	}
-	if (options.height !== undefined && options.height !== null) {
-		options.element.style.height = computedStyle.height;
-	}
-	options.element.offsetWidth; // This line does nothing but force the element to redraw so the transition works properly.
-};
 
-transitionAuto.setDimensions = (options) => {
-	let elementBoundingClientRect;
-	let innerElementBoundingClientRect;
-	if (options.width === 'auto' || options.height === 'auto') {
-		elementBoundingClientRect = options.element.getBoundingClientRect();
-		innerElementBoundingClientRect = options.innerElement.getBoundingClientRect();
-	}
-	if (options.width !== undefined && options.width !== null) {
-		if (options.width === 'auto' && elementBoundingClientRect.width !== innerElementBoundingClientRect.width) {
-			options.element.addEventListener('transitionend', transitionAuto.transitionendHandlerWidthAuto);
-			options.element.style.width = innerElementBoundingClientRect.width + 'px';
-		}
-		else {
-			options.element.style.width = options.width;
+	function debug(options, ...messages) {
+		if (options.debug) {
+			console.log(debugPrefix, ...messages);
 		}
 	}
-	if (options.height !== undefined && options.height !== null) {
-		if (options.height === 'auto' && elementBoundingClientRect.height !== innerElementBoundingClientRect.height) {
-			options.element.addEventListener('transitionend', transitionAuto.transitionendHandlerHeightAuto);
-			options.element.style.height = innerElementBoundingClientRect.height + 'px';
-		}
-		else {
-			options.element.style.height = options.height;
-		}
-	}
-};
 
-transitionAuto.transitionendHandlerWidthAuto = (event) => {
-	if (event.propertyName === 'width') {
-		event.target.removeEventListener('transitionend', transitionAuto.transitionendHandlerWidthAuto);
-		event.target.style.width = 'auto';
-	}
-};
+	function normalizeOptions(options) {
+		options = extend({}, options);
+	
+		if (options.innerElement === undefined || options.innerElement === null) {
+			if (options.element.children.length > 0) {
+				options.innerElement = options.element.children[0];
+			}
+			else {
+				error(`'options.element' must have at least one child element to use as 'options.innerElement'.`);
+			}
+		}
+	
+		if (typeof options.value === 'number') {
+			options.value += 'px';
+		}
 
-transitionAuto.transitionendHandlerHeightAuto = (event) => {
-	if (event.propertyName === 'height') {
-		event.target.removeEventListener('transitionend', transitionAuto.transitionendHandlerHeightAuto);
-		event.target.style.height = 'auto';
+		if (options.suppressDuplicates === undefined) {
+			options.suppressDuplicates = true;
+		}
+	
+		return options;
 	}
-};
+	
+	function setValue(options) {
+		options.element.transitionAutoValue = options.value;
+		const computedStyle = getComputedStyle(options.element);
+		options.element.style[options.property] = computedStyle[options.property];
+		options.element.offsetWidth; // This line does nothing but force the element to repaint so transitions work properly.
+		const getComputedTransitionProperties = computedStyle.transitionProperty.split(', ');
+		if (getComputedTransitionProperties.includes(options.property)) {
+			if (options.value === 'auto') {
+				const elementDimensions = options.element.getBoundingClientRect();
+				const innerElementDimensions = options.innerElement.getBoundingClientRect();
+				if (elementDimensions[options.property] !== innerElementDimensions[options.property]) {
+					options.element.transitionAutoBoundHandler = transitionendHandler.bind(options);
+					options.element.addEventListener('transitionend', options.element.transitionAutoBoundHandler);
+					options.element.style[options.property] = innerElementDimensions[options.property] + 'px';
+					return;
+				}
+			}
+			else {
+				if (options.element.style[options.property] !== options.value) {
+					options.element.transitionAutoBoundHandler = transitionendHandler.bind(options);
+					options.element.addEventListener('transitionend', options.element.transitionAutoBoundHandler);
+					options.element.style[options.property] = options.value;
+					return;
+				}
+			}
+		}
+		options.element.style[options.property] = options.value;
+		onComplete(options);
+	}
+	
+	function transitionendHandler(event) {
+		if (event.propertyName === this.property) {
+			if (this.element.transitionAutoBoundHandler) {
+				this.element.removeEventListener('transitionend', this.element.transitionAutoBoundHandler);
+				delete this.element.transitionAutoBoundHandler;
+			}
+			if (this.value === 'auto') {
+				this.element.style[this.property] = this.value;
+			}
+		}
+		onComplete(this);
+	}
+
+	function onComplete(options) {
+		if (options.element.transitionAutoValue) {
+			delete options.element.transitionAutoValue;
+		}
+		if (options.onComplete) {
+			options.onComplete(options);
+		}
+	}
+
+	return function (options) {
+		try {
+			optionsSchema.validate(options);
+		}
+		catch (error) {
+			prefixedError(error);
+		}
+		options = normalizeOptions(options);
+		debug(options, 'options:', options);
+		if (options.suppressDuplicates && options.element.transitionAutoValue) {
+			if (options.value === options.element.transitionAutoValue) {
+				debug(options, 'duplicate suppressed');
+				return;
+			}
+		}
+		if (options.element.transitionAutoBoundHandler) {
+			options.element.removeEventListener('transitionend', options.element.transitionAutoBoundHandler);
+			delete options.element.transitionAutoBoundHandler;
+		}
+		setValue(options);
+	};
+
+})();
 
 module.exports = transitionAuto;
 
@@ -399,34 +400,47 @@ const optionsModel = {
 				}
 			}
 		},
-		width: [
+		property: {
+			required: true,
+			type: 'string',
+			exactValue: [
+				'height',
+				'width'
+			]
+		},
+		value: [
 			{
-				type: 'number'
+				required: true,
+				type: 'number',
+				greaterThanOrEqualTo: 0
 			},
 			{
-				type: 'string'
-			}
-		],
-		height: [
-			{
-				type: 'number'
+				required: true,
+				type: 'string',
+				custom: (inputPathManager) => {
+					const value = inputPathManager.value;
+					if (value.endsWith('px')) {
+						return true;
+					}
+					else {
+						throw new Schema.ValidationError(`'options.value' string must end with 'px'.`);
+					}
+				}
 			},
 			{
-				type: 'string'
+				required: true,
+				type: 'string',
+				exactValue: 'auto'
 			}
 		],
+		onComplete: {
+			type: 'function'
+		},
+		suppressDuplicates: {
+			type: 'boolean'
+		},
 		debug: {
 			type: 'boolean'
-		}
-	},
-	custom: (inputPathManager) => {
-		const requiredSchema = new Schema({required: true});
-		if (!requiredSchema.validate(inputPathManager.value.width, 'boolean') &&
-		!requiredSchema.validate(inputPathManager.value.height, 'boolean')) {
-			throw new Schema.ValidationError(`At least one 'options.width' or 'options.height' value is required.`);
-		}
-		else {
-			return true;
 		}
 	}
 };
@@ -441,8 +455,8 @@ module.exports = optionsSchema;
 
 const DataPathManager = __webpack_require__(2);
 const ValidationError = __webpack_require__(1);
-const ValidationErrors = __webpack_require__(6);
-const modelModel = __webpack_require__(7);
+const ValidationErrors = __webpack_require__(7);
+const modelModel = __webpack_require__(8);
 
 class Schema {
 	
@@ -854,6 +868,35 @@ module.exports = Schema;
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/**
+ * isPlainObject v1.0.1
+ * https://github.com/alexspirgel/isPlainObject
+ */
+
+const isPlainObject = (object) => {
+	if (Object.prototype.toString.call(object) !== '[object Object]') {
+		return false;
+	}
+  if (object.constructor === undefined) {
+		return true;
+	}
+  if (Object.prototype.toString.call(object.constructor.prototype) !== '[object Object]') {
+		return false;
+	}
+  if (!object.constructor.prototype.hasOwnProperty('isPrototypeOf')) {
+    return false;
+  }
+  return true;
+};
+
+if ( true && module.exports) {
+	module.exports = isPlainObject;
+}
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
 const ValidationError = __webpack_require__(1);
 
 class ValidationErrors {
@@ -905,7 +948,7 @@ class ValidationErrors {
 module.exports = ValidationErrors;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const extend = __webpack_require__(0);
@@ -1043,37 +1086,6 @@ modelPropertySchema.allPropertySchema = modelTypeRestricted;
 modelPropertySchema.propertySchema.allPropertySchema = model;
 
 module.exports = model;
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const extend = __webpack_require__(0);
-
-const normalizeOptions = (options) => {
-	const normalizedOptions = extend({}, options);
-
-	if (normalizedOptions.innerElement === undefined || normalizedOptions.innerElement === null) {
-		if (normalizedOptions.element.children.length > 0) {
-			normalizedOptions.innerElement = normalizedOptions.element.children[0];
-		}
-		else {
-			throw new Error(`'options.element' must have at least one child element to use as 'options.innerElement'.`);
-		}
-	}
-
-	const defaultUnit = 'px';
-	if (typeof normalizedOptions.width === 'number') {
-		normalizedOptions.width += defaultUnit;
-	}
-	if (typeof normalizedOptions.height === 'number') {
-		normalizedOptions.height += defaultUnit;
-	}
-
-	return normalizedOptions;
-};
-
-module.exports = normalizeOptions;
 
 /***/ })
 /******/ ]);
