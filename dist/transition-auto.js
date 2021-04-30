@@ -1,5 +1,5 @@
 /*!
- * transition-auto v2.0.0
+ * transition-auto v2.0.1
  * https://github.com/alexspirgel/transition-auto
  */
 var transitionAuto =
@@ -258,7 +258,7 @@ const transitionAuto = (function () {
 
 	const errorPrefix = 'transitionAuto error: ';
 	const debugPrefix = 'transitionAuto debug: ';
-	
+
 	function prefixedError(message) {
 		throw new Error(errorPrefix + message);
 	}
@@ -271,7 +271,7 @@ const transitionAuto = (function () {
 
 	function normalizeOptions(options) {
 		options = extend({}, options);
-	
+
 		if (options.innerElement === undefined || options.innerElement === null) {
 			if (options.element.children.length > 0) {
 				options.innerElement = options.element.children[0];
@@ -280,7 +280,7 @@ const transitionAuto = (function () {
 				error(`'options.element' must have at least one child element to use as 'options.innerElement'.`);
 			}
 		}
-	
+
 		if (typeof options.value === 'number') {
 			options.value += 'px';
 		}
@@ -288,17 +288,29 @@ const transitionAuto = (function () {
 		if (options.suppressDuplicates === undefined) {
 			options.suppressDuplicates = true;
 		}
-	
+
 		return options;
 	}
-	
+
 	function setValue(options) {
 		options.element.transitionAutoValue = options.value;
 		const computedStyle = getComputedStyle(options.element);
 		options.element.style[options.property] = computedStyle[options.property];
-		options.element.offsetWidth; // This line does nothing but force the element to repaint so transitions work properly.
-		const getComputedTransitionProperties = computedStyle.transitionProperty.split(', ');
-		if (getComputedTransitionProperties.includes(options.property)) {
+		options.element.offsetHeight; // This line does nothing but force the element to repaint so transitions work properly.
+
+		let hasTransition = false;
+		for (let transitionValue of computedStyle.transition.split(', ')) {
+			const transitionValueParts = transitionValue.split(' ');
+			if (transitionValueParts[0] === 'all' || transitionValueParts[0] === options.property) {
+				if (transitionValueParts[1] !== '0s') {
+					hasTransition = true;
+					break;
+				}
+			}
+		}
+
+		if (hasTransition) {
+			debug(options, 'transition detected.');
 			if (options.value === 'auto') {
 				const elementDimensions = options.element.getBoundingClientRect();
 				const innerElementDimensions = options.innerElement.getBoundingClientRect();
@@ -318,6 +330,8 @@ const transitionAuto = (function () {
 				}
 			}
 		}
+
+		debug(options, 'immediate fallback.');
 		options.element.style[options.property] = options.value;
 		onComplete(options);
 	}
@@ -355,7 +369,7 @@ const transitionAuto = (function () {
 		debug(options, 'options:', options);
 		if (options.suppressDuplicates && options.element.transitionAutoValue) {
 			if (options.value === options.element.transitionAutoValue) {
-				debug(options, 'duplicate suppressed');
+				debug(options, 'duplicate suppressed.');
 				return;
 			}
 		}
