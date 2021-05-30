@@ -45,12 +45,14 @@ const transitionAuto = (function () {
 		const computedStyle = getComputedStyle(options.element);
 		options.element.style[options.property] = computedStyle[options.property];
 		options.element.offsetHeight; // This line does nothing but force the element to repaint so transitions work properly.
-
+		
 		let hasTransition = false;
-		for (const transitionValue of computedStyle.transition.split(', ')) {
-			const transitionValueParts = transitionValue.split(' ');
-			if (transitionValueParts[0] === 'all' || transitionValueParts[0] === options.property) {
-				if (transitionValueParts[1] !== '0s') {
+		const transitionPropertyValues = computedStyle.transitionProperty.split(', ');
+		const transitionDurationValues = computedStyle.transitionDuration.split(', ');
+		for (let i = 0; i < transitionPropertyValues.length; i++) {
+			if (transitionPropertyValues[i] === 'all' || transitionPropertyValues[i] === options.property) {
+				const transitionDuration = transitionDurationValues[i] ? transitionDurationValues[i] : transitionDurationValues[0];
+				if (transitionDuration !== '0s') {
 					hasTransition = true;
 					break;
 				}
