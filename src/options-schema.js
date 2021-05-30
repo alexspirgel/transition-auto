@@ -3,6 +3,7 @@ const Schema = require('@alexspirgel/schema');
 const optionsModel = {
 	required: true,
 	type: 'object',
+	allowUnvalidatedProperties: false,
 	propertySchema: {
 		element: {
 			required: true,

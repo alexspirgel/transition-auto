@@ -289,6 +289,10 @@ const transitionAuto = (function () {
 			options.suppressDuplicates = true;
 		}
 
+		if (options.debug === undefined) {
+			options.debug = false;
+		}
+
 		return options;
 	}
 
@@ -393,6 +397,7 @@ const Schema = __webpack_require__(5);
 const optionsModel = {
 	required: true,
 	type: 'object',
+	allowUnvalidatedProperties: false,
 	propertySchema: {
 		element: {
 			required: true,

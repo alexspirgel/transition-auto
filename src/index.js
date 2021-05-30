@@ -36,6 +36,10 @@ const transitionAuto = (function () {
 			options.suppressDuplicates = true;
 		}
 
+		if (options.debug === undefined) {
+			options.debug = false;
+		}
+
 		return options;
 	}
 
