@@ -1,5 +1,5 @@
 /*!
- * transition-auto v2.0.1
+ * transition-auto v2.0.3
  * https://github.com/alexspirgel/transition-auto
  */
 var transitionAuto =
@@ -256,16 +256,13 @@ const extend = __webpack_require__(0);
 
 const transitionAuto = (function () {
 
-	const errorPrefix = 'transitionAuto error: ';
-	const debugPrefix = 'transitionAuto debug: ';
-
 	function prefixedError(message) {
-		throw new Error(errorPrefix + message);
+		throw new Error('transitionAuto error: ' + message);
 	}
 
 	function debug(options, ...messages) {
 		if (options.debug) {
-			console.log(debugPrefix, ...messages);
+			console.log('debugPrefix', ...messages);
 		}
 	}
 
@@ -277,7 +274,7 @@ const transitionAuto = (function () {
 				options.innerElement = options.element.children[0];
 			}
 			else {
-				error(`'options.element' must have at least one child element to use as 'options.innerElement'.`);
+				prefixedError(`'options.element' must have at least one child element to use as 'options.innerElement'.`);
 			}
 		}
 
@@ -303,7 +300,7 @@ const transitionAuto = (function () {
 		options.element.offsetHeight; // This line does nothing but force the element to repaint so transitions work properly.
 
 		let hasTransition = false;
-		for (let transitionValue of computedStyle.transition.split(', ')) {
+		for (const transitionValue of computedStyle.transition.split(', ')) {
 			const transitionValueParts = transitionValue.split(' ');
 			if (transitionValueParts[0] === 'all' || transitionValueParts[0] === options.property) {
 				if (transitionValueParts[1] !== '0s') {
