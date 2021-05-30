@@ -2,6 +2,8 @@
 
 Transition Auto is a JavaScript function enabling element width and height transitions to and from auto.
 
+<a href="http://alexanderspirgel.com/transition-auto/demo" target="_blank">View the demo →</a>
+
 Notes:
 * Resizing the element during the transition to auto can cause a "jump" to the new auto value at the end of the transition.
 * The `innerElement` should not have styling that would cause it to differ in size from the `element`.
