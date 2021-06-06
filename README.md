@@ -43,12 +43,20 @@ HTML:
 CSS:
 ```css
 .outer {
+  /* Prevent the content from overflowing the parent. */
   overflow: hidden;
+  /* Add transition */
   transition-property: height; /* and/or width */
   transition-duration: 1s;
 }
 .inner {
-  overflow: auto; /* optional, prevents margin overflow */
+  /* Margins will cause incorrect dimension calculations. */
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
+  /* Force element account for children margins in dimensions. */
+  overflow: auto;
 }
 ```
 

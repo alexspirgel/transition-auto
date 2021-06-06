@@ -7,11 +7,19 @@
 		<style>
 			/* transitionAuto CSS*/
 			.outer {
+				/* Prevent the content from overflowing the parent. */
 				overflow: hidden;
+				/* Add transition */
 				transition-property: height;
 				transition-duration: 1s;
 			}
 			.inner {
+				/* Margins will cause incorrect dimension calculations. */
+				margin-top: 0;
+				margin-bottom: 0;
+				margin-left: 0;
+				margin-right: 0;
+				/* Force element account for children margins in dimensions. */
 				overflow: auto;
 			}
 
