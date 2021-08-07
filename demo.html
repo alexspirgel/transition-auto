@@ -9,9 +9,6 @@
 			.outer {
 				/* Prevent the content from overflowing the parent. */
 				overflow: hidden;
-				/* Add transition */
-				transition-property: height;
-				transition-duration: 1s;
 			}
 			.inner {
 				/* Margins will cause incorrect dimension calculations. */
@@ -19,7 +16,7 @@
 				margin-bottom: 0;
 				margin-left: 0;
 				margin-right: 0;
-				/* Force element account for children margins in dimensions. */
+				/* Force element to account for children margins in dimensions. */
 				overflow: auto;
 			}
 
@@ -39,6 +36,8 @@
 				padding: 0 16px;
 				resize: horizontal;
 				background-color: #5c5c5c;
+				transition-property: height;
+				transition-duration: 1s;
 			}
 			.outer::before {
 				content: "resize";

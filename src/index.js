@@ -9,7 +9,7 @@ const transitionAuto = (function () {
 
 	function debug(options, ...messages) {
 		if (options.debug) {
-			console.log('debugPrefix', ...messages);
+			console.log('transitionAuto debug: ', ...messages);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*!
- * transition-auto v2.0.3
+ * transition-auto v2.0.5
  * https://github.com/alexspirgel/transition-auto
  */
 var transitionAuto =
@@ -262,7 +262,7 @@ const transitionAuto = (function () {
 
 	function debug(options, ...messages) {
 		if (options.debug) {
-			console.log('debugPrefix', ...messages);
+			console.log('transitionAuto debug: ', ...messages);
 		}
 	}
 
