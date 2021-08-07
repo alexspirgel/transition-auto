@@ -1,5 +1,5 @@
 /*!
- * transition-auto v2.0.5
+ * transition-auto v2.0.6
  * https://github.com/alexspirgel/transition-auto
  */
 var transitionAuto =
